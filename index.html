@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental & Ethical Impact of Technology - GCSE Computer Science</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#007BA6',
+                            dark: '#005F80',
+                            light: '#eef7fa',
+                        },
+                        tealAccent: {
+                            DEFAULT: '#00796B',
+                            light: '#e0f2f1',
+                        },
+                        alertRed: '#C62828'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Perspective for 3D Flashcard Flip */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation utilities */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen p-3 md:p-6 flex flex-col">
+
+    <div class="max-w-4xl mx-auto w-full bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col flex-1">
+        
+        <!-- HEADER & OVERALL PROGRESS -->
+        <header class="bg-gradient-to-r from-brand to-tealAccent text-white p-4 md:p-6 shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <span class="inline-block bg-white/20 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider mb-2">GCSE Computer Science</span>
+                    <h1 class="text-2xl md:text-3xl font-bold">Environmental & Ethical Impact of Technology</h1>
+                    <p class="text-tealAccent-light text-sm mt-1">Master key concepts: Energy, E-waste, Health, Privacy, Inclusion & Professional Conduct</p>
+                </div>
+                <!-- Overall Mastery Badge -->
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center gap-3 self-start md:self-auto min-w-[160px]">
+                    <div class="text-3xl text-yellow-300"><i class="fa-solid fa-trophy"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-100 font-medium">Overall Progress</div>
+                        <div id="overall-progress-text" class="text-xl font-bold">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex gap-1 md:gap-2 mt-6 overflow-x-auto pb-1 border-b border-white/20 text-xs md:text-sm font-medium">
+                <button onclick="switchTab('flashcards')" id="tab-flashcards" class="tab-btn active-tab flex items-center gap-2 px-3 py-2 rounded-t-lg bg-white text-brand font-semibold transition-all shrink-0">
+                    <i class="fa-solid fa-layer-group"></i> 1. Flashcards
+                </button>
+                <button onclick="switchTab('matching')" id="tab-matching" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-t-lg text-white hover:bg-white/10 transition-all shrink-0">
+                    <i class="fa-solid fa-puzzle-piece"></i> 2. Term Match
+                </button>
+                <button onclick="switchTab('sorting')" id="tab-sorting" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-t-lg text-white hover:bg-white/10 transition-all shrink-0">
+                    <i class="fa-solid fa-boxes-stacked"></i> 3. Categorise
+                </button>
+                <button onclick="switchTab('fillblanks')" id="tab-fillblanks" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-t-lg text-white hover:bg-white/10 transition-all shrink-0">
+                    <i class="fa-solid fa-pen-to-square"></i> 4. Keywords
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn flex items-center gap-2 px-3 py-2 rounded-t-lg text-white hover:bg-white/10 transition-all shrink-0">
+                    <i class="fa-solid fa-circle-check"></i> 5. Practice Quiz
+                </button>
+            </nav>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="p-4 md:p-6 flex-1 bg-slate-50/50">
+
+            <!-- MODE 1: FLASHCARDS -->
+            <section id="section-flashcards" class="tab-content fade-in space-y-4">
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 text-sm">
+                    <span class="text-slate-600 font-medium"><i class="fa-solid fa-rotate text-brand mr-2"></i>Tap card to flip definition</span>
+                    <span id="flashcard-counter" class="font-bold text-brand">1 / 14</span>
+                </div>
+
+                <!-- Flashcard Container -->
+                <div class="perspective-1000 w-full min-h-[260px] md:min-h-[300px] cursor-pointer group" onclick="flipCard()">
+                    <div id="flashcard-inner" class="relative w-full h-full min-h-[260px] md:min-h-[300px] rounded-2xl shadow-sm border border-slate-200 bg-white transition-transform duration-500 transform-style-3d text-center p-6 flex flex-col justify-center items-center">
+                        <!-- Front side -->
+                        <div class="absolute inset-0 backface-hidden p-6 flex flex-col items-center justify-center bg-white rounded-2xl border-2 border-brand/20">
+                            <span class="text-xs font-bold text-brand bg-brand-light px-3 py-1 rounded-full uppercase tracking-wider mb-4">Key Term</span>
+                            <h2 id="card-front-term" class="text-2xl md:text-3xl font-bold text-slate-800">Carbon Footprint</h2>
+                            <p class="text-xs text-slate-400 mt-6"><i class="fa-solid fa-hand-pointer mr-1"></i> Click to flip definition</p>
+                        </div>
+                        <!-- Back side -->
+                        <div class="absolute inset-0 backface-hidden rotate-y-180 p-6 flex flex-col items-center justify-center bg-brand-light rounded-2xl border-2 border-brand">
+                            <span class="text-xs font-bold text-tealAccent bg-white px-3 py-1 rounded-full uppercase tracking-wider mb-2">Definition</span>
+                            <p id="card-back-def" class="text-slate-700 text-base md:text-lg font-medium leading-relaxed max-w-lg">The total greenhouse gas emissions caused directly and indirectly by an individual, organisation, device, or digital activity.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flashcard Control Buttons -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <button onclick="prevCard()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-sm transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Previous
+                    </button>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="markCard(false)" class="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 font-semibold rounded-lg text-sm transition-all flex items-center gap-1.5 border border-rose-300">
+                            <i class="fa-solid fa-xmark"></i> Review Again
+                        </button>
+                        <button onclick="markCard(true)" class="px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold rounded-lg text-sm transition-all flex items-center gap-1.5 border border-emerald-300">
+                            <i class="fa-solid fa-check"></i> Got It!
+                        </button>
+                    </div>
+
+                    <button onclick="nextCard()" class="px-4 py-2 bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg text-sm transition-all flex items-center gap-2">
+                        Next <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- MODE 2: MATCHING GAME -->
+            <section id="section-matching" class="tab-content hidden fade-in space-y-4">
+                <div class="bg-white p-3 rounded-lg border border-slate-200 flex flex-wrap justify-between items-center text-sm gap-2">
+                    <p class="text-slate-600"><i class="fa-solid fa-hand-pointer text-brand mr-2"></i>Select a <strong>Term</strong> on the left, then select its matching <strong>Definition</strong> on the right.</p>
+                    <div class="flex items-center gap-4">
+                        <span class="font-semibold text-slate-700"><i class="fa-solid fa-stopwatch text-slate-400 mr-1"></i> Time: <span id="matching-timer" class="font-mono text-brand">00:00</span></span>
+                        <button onclick="initMatchingGame()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-medium border border-slate-300"><i class="fa-solid fa-rotate-right mr-1"></i> Reset</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Terms Column -->
+                    <div id="matching-terms" class="space-y-2.5"></div>
+                    <!-- Definitions Column -->
+                    <div id="matching-defs" class="space-y-2.5"></div>
+                </div>
+            </section>
+
+            <!-- MODE 3: CATEGORISATION / SORTING TASK -->
+            <section id="section-sorting" class="tab-content hidden fade-in space-y-4">
+                <div class="bg-white p-3.5 rounded-lg border border-slate-200 flex flex-wrap justify-between items-center text-sm gap-2">
+                    <p class="text-slate-600"><i class="fa-solid fa-layer-group text-brand mr-2"></i>Tap an item below to assign it to its correct category.</p>
+                    <button onclick="initSortingGame()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-medium border border-slate-300"><i class="fa-solid fa-rotate-right mr-1"></i> Reset Tasks</button>
+                </div>
+
+                <!-- Unsorted Items Pool -->
+                <div class="bg-slate-100 p-4 rounded-xl border border-slate-300 min-h-[90px]">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Unsorted Impacts & Issues (<span id="unsorted-count">0</span> remaining)</span>
+                    <div id="sorting-pool" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Categories Container -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Bucket 1: Environmental -->
+                    <div class="bg-white p-4 rounded-xl border-2 border-brand/30 flex flex-col h-full min-h-[220px]">
+                        <h3 class="text-base font-bold text-brand border-b border-slate-200 pb-2 mb-3 flex items-center justify-between">
+                            <span><i class="fa-solid fa-leaf mr-2"></i>Environmental Impact</span>
+                            <span id="count-bucket-env" class="text-xs bg-brand-light text-brand px-2 py-0.5 rounded-full font-semibold">0</span>
+                        </h3>
+                        <div id="bucket-env" class="sorting-bucket flex-1 space-y-2 p-1 rounded-lg border border-dashed border-slate-200 bg-slate-50/50"></div>
+                    </div>
+
+                    <!-- Bucket 2: Ethical -->
+                    <div class="bg-white p-4 rounded-xl border-2 border-tealAccent/30 flex flex-col h-full min-h-[220px]">
+                        <h3 class="text-base font-bold text-tealAccent border-b border-slate-200 pb-2 mb-3 flex items-center justify-between">
+                            <span><i class="fa-solid fa-scale-balanced mr-2"></i>Ethical Impact</span>
+                            <span id="count-bucket-ethic" class="text-xs bg-tealAccent-light text-tealAccent px-2 py-0.5 rounded-full font-semibold">0</span>
+                        </h3>
+                        <div id="bucket-ethic" class="sorting-bucket flex-1 space-y-2 p-1 rounded-lg border border-dashed border-slate-200 bg-slate-50/50"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODE 4: FILL-IN-THE-BLANKS / KEYWORD CHALLENGE -->
+            <section id="section-fillblanks" class="tab-content hidden fade-in space-y-4">
+                <div class="bg-white p-3 rounded-lg border border-slate-200 text-sm text-slate-600">
+                    <p><i class="fa-solid fa-keyboard text-brand mr-2"></i>Select the correct technical term from the word bank to complete each sentence.</p>
+                </div>
+
+                <!-- Word Bank -->
+                <div class="bg-brand-light/60 p-4 rounded-xl border border-brand/20">
+                    <span class="text-xs font-bold text-brand uppercase tracking-wider block mb-2">Word Bank</span>
+                    <div id="cloze-wordbank" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Sentence List -->
+                <div id="cloze-questions" class="space-y-4"></div>
+
+                <div class="pt-2 flex justify-end">
+                    <button onclick="checkClozeAnswers()" class="px-5 py-2.5 bg-brand hover:bg-brand-dark text-white font-bold rounded-lg text-sm transition-all shadow-sm">
+                        <i class="fa-solid fa-check-double mr-1.5"></i> Check Sentences
+                    </button>
+                </div>
+            </section>
+
+            <!-- MODE 5: PRACTICE QUIZ -->
+            <section id="section-quiz" class="tab-content hidden fade-in space-y-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                        <span id="quiz-question-number" class="text-xs font-bold text-brand uppercase tracking-wider">Question 1 of 6</span>
+                        <span id="quiz-score-badge" class="text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-1 rounded-full">Score: 0</span>
+                    </div>
+
+                    <h3 id="quiz-question-text" class="text-lg font-bold text-slate-800 leading-snug">Question text goes here?</h3>
+
+                    <!-- Options -->
+                    <div id="quiz-options-container" class="space-y-2.5 pt-1"></div>
+
+                    <!-- Detailed Explanation Area -->
+                    <div id="quiz-explanation" class="hidden p-4 rounded-lg bg-slate-100 text-sm border border-slate-200 mt-4 fade-in">
+                        <h4 id="quiz-explanation-title" class="font-bold mb-1 text-slate-800">Explanation</h4>
+                        <p id="quiz-explanation-body" class="text-slate-600 leading-relaxed"></p>
+                    </div>
+
+                    <!-- Next Question Control -->
+                    <div class="flex justify-end pt-2">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-5 py-2 bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg text-sm transition-all">
+                            Next Question <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER & SUMMARY BADGES -->
+        <footer class="bg-slate-100 border-t border-slate-200 p-4 text-xs text-slate-500 flex flex-wrap justify-between items-center gap-2">
+            <div><i class="fa-solid fa-graduation-cap text-brand mr-1"></i> GCSE Computer Science Interactive Revision Suite</div>
+            <div id="badges-container" class="flex gap-2">
+                <span id="badge-fc" title="Flashcards Mastered" class="px-2 py-0.5 rounded bg-slate-200 text-slate-500 font-medium">Cards: 0/14</span>
+                <span id="badge-match" title="Matching Completed" class="px-2 py-0.5 rounded bg-slate-200 text-slate-500 font-medium">Match: ✖</span>
+                <span id="badge-sort" title="Sorting Completed" class="px-2 py-0.5 rounded bg-slate-200 text-slate-500 font-medium">Sort: ✖</span>
+                <span id="badge-quiz" title="Quiz Completed" class="px-2 py-0.5 rounded bg-slate-200 text-slate-500 font-medium">Quiz: 0%</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        /* ================= DATA STRUCTURES ================= */
+        const flashcardData = [
+            { id: 1, term: "Carbon Footprint", def: "The total amount of greenhouse gases produced directly and indirectly by operating devices, server infrastructure, or digital services." },
+            { id: 2, term: "E-Waste (Electronic Waste)", def: "Discarded electronic devices containing toxic chemicals (e.g. lead, mercury) that pose environmental hazards if not recycled." },
+            { id: 3, term: "Planned Obsolescence", def: "Designing devices to become outdated, non-functional, or difficult to repair after a set period, forcing users to buy upgrades." },
+            { id: 4, term: "Rare Earth Elements", def: "Precious metals (e.g. lithium, cobalt, gold) mined for electronics, whose extraction causes habitat loss and water pollution." },
+            { id: 5, term: "Vampire Energy", def: "Electricity consumed by electronic devices while they are turned off or remaining in standby mode." },
+            { id: 6, term: "Repetitive Strain Injury (RSI)", def: "Pain or muscle damage in hands, wrists, or arms caused by repeated physical movements such as typing or clicking." },
+            { id: 7, term: "Digital Divide", def: "The inequality of access to modern technology and high-speed internet due to socio-economic, geographic, or age factors." },
+            { id: 8, term: "Data Mining", def: "Analyzing large datasets to discover hidden patterns, trends, and user behaviors for targeting or algorithmic decisions." },
+            { id: 9, term: "BCS Code of Conduct", def: "Ethical standards established by the British Computer Society requiring computing professionals to act in the public interest." },
+            { id: 10, term: "Accessibility", def: "Designing software and hardware so it can be used effectively by individuals with disabilities or sensory impairments." },
+            { id: 11, term: "UK GDPR / DPA 2018", def: "Legislation regulating how personal data must be legally collected, processed, securely stored, and respected by organisations." },
+            { id: 12, term: "Surveillance & Privacy", def: "Monitoring digital activities and location data, raising ethical concerns over personal freedom and consent." },
+            { id: 13, term: "Digital Inclusion", def: "Ensuring all individuals in society have equal access, skills, and opportunities to benefit from digital services." },
+            { id: 14, term: "Professional Ethics", def: "Moral principles governing the behavior of developers and IT engineers, including bias prevention and data security." }
+        ];
+
+        const sortingData = [
+            { id: "s1", title: "Data Centre Electricity & Cooling Demand", category: "env" },
+            { id: "s2", title: "Mining Lithium & Cobalt for Batteries", category: "env" },
+            { id: "s3", title: "Repetitive Strain Injury (RSI) & Eye Strain", category: "env" },
+            { id: "s4", title: "Toxic Lead Leakage from Discarded Phones", category: "env" },
+            { id: "s5", title: "Planned Obsolescence in Hardware", category: "env" },
+            { id: "s6", title: "Digital Divide in Rural Broadband Access", category: "ethic" },
+            { id: "s7", title: "Algorithmic Bias in Automated Recruitment", category: "ethic" },
+            { id: "s8", title: "Compliance with BCS Professional Conduct", category: "ethic" },
+            { id: "s9", title: "Screen Readers & High Contrast Accessibility", category: "ethic" },
+            { id: "s10", title: "Unauthorized Facial Recognition Surveillance", category: "ethic" }
+        ];
+
+        const clozeData = [
+            { sentence: "Designing electronic hardware to become outdated quickly so consumers buy upgrades is known as planned ________.", answer: "Obsolescence", options: ["Obsolescence", "Mining", "Inclusion"] },
+            { sentence: "The gap between people with full access to modern technology and those without is called the digital ________.", answer: "Divide", options: ["Divide", "Footprint", "Surveillance"] },
+            { sentence: "To prevent lead and mercury contamination in landfills, old tech devices must be processed as e-________.", answer: "Waste", options: ["Waste", "Data", "Energy"] },
+            { sentence: "UK professionals bound by the BCS Code of Conduct must prioritize public interest, privacy, and professional ________.", answer: "Competence", options: ["Competence", "Obsolescence", "Mining"] }
+        ];
+
+        const quizData = [
+            {
+                question: "Which of the following is an environmental concern directly caused by improper disposal of smartphones?",
+                options: [
+                    "Widen social inequality via the digital divide",
+                    "Leaching of toxic heavy metals like lead and mercury into soil and groundwater",
+                    "Breaching the UK Data Protection Act 2018",
+                    "Preventing screen readers from operating correctly"
+                ],
+                correct: 1,
+                explanation: "Improper e-waste disposal releases toxic metals like lead, mercury, and cadmium into surrounding soil and water supplies."
+            },
+            {
+                question: "How does 'Planned Obsolescence' negatively affect the environment?",
+                options: [
+                    "It reduces energy consumption by replacing old units with faster ones.",
+                    "It encourages rapid replacement of devices, accelerating raw material depletion and e-waste generation.",
+                    "It forces companies to comply with the BCS Code of Conduct.",
+                    "It automatically encrypts user data to prevent unauthorized mining."
+                ],
+                correct: 1,
+                explanation: "Planned obsolescence leads consumers to discard devices sooner than necessary, increasing e-waste volumes and the demand for raw materials."
+            },
+            {
+                question: "What is the primary objective of the 'Digital Divide' initiatives in computing ethics?",
+                options: [
+                    "To ensure data centres operate on 100% renewable energy",
+                    "To ensure equitable access to technology, high-speed internet, and digital skills for all social groups",
+                    "To eliminate all open-source software distributions",
+                    "To replace manual password authentication with facial biometrics"
+                ],
+                correct: 1,
+                explanation: "Addressing the digital divide aims to eliminate social and economic inequality by giving everyone equal access to digital tools and connectivity."
+            },
+            {
+                question: "Under the BCS Code of Conduct, what is a primary professional responsibility of a software developer?",
+                options: [
+                    "To maximize company profits regardless of privacy implications",
+                    "To design systems that work exclusively on high-end hardware",
+                    "To act with integrity, promote accessibility, and safeguard public interest and security",
+                    "To encourage short hardware lifecycles"
+                ],
+                correct: 2,
+                explanation: "The British Computer Society (BCS) Code of Conduct mandates professional competence, integrity, protection of public health and safety, and data security."
+            },
+            {
+                question: "Why do massive cloud data centres have a significant environmental impact?",
+                options: [
+                    "They do not use RAM or CPU scheduling.",
+                    "They rely heavily on non-renewable energy for 24/7 power and liquid cooling systems.",
+                    "They cause repetitive strain injuries to distant network administrators.",
+                    "They only store text files without images."
+                ],
+                correct: 1,
+                explanation: "Data centres run continuously and consume enormous electricity for compute power and active cooling infrastructure, contributing significantly to carbon emissions."
+            },
+            {
+                question: "Which feature is specifically implemented to improve ethical digital inclusion and accessibility?",
+                options: [
+                    "Defragmenting hard disk drives",
+                    "Adding screen reader support, alt-text, and high-contrast color modes",
+                    "Limiting battery charge capacity to 80%",
+                    "Requiring users to accept third-party cookies"
+                ],
+                correct: 1,
+                explanation: "Accessibility features (screen readers, high contrast, captions) ensure users with physical or sensory impairments can access software without barriers."
+            }
+        ];
+
+        /* ================= STATE TRACKING ================= */
+        let state = {
+            masteredCards: new Set(),
+            currentCardIndex: 0,
+            isCardFlipped: false,
+            
+            // Matching State
+            matchingSelectedTerm: null,
+            matchingSelectedDef: null,
+            matchingMatchesFound: 0,
+            matchingTimerSeconds: 0,
+            matchingTimerInterval: null,
+
+            // Sorting State
+            unsortedItems: [],
+            sortingEnv: [],
+            sortingEthic: [],
+
+            // Cloze State
+            clozeUserAnswers: {},
+
+            // Quiz State
+            quizIndex: 0,
+            quizScore: 0,
+            quizAnswered: false
+        };
+
+        /* ================= INITIALIZATION & TAB NAVIGATION ================= */
+        window.onload = function() {
+            initFlashcards();
+            initMatchingGame();
+            initSortingGame();
+            initClozeGame();
+            initQuiz();
+            updateOverallProgress();
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-brand', 'font-semibold');
+                btn.classList.add('text-white');
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('bg-white', 'text-brand', 'font-semibold');
+            activeBtn.classList.remove('text-white');
+        }
+
+        function updateOverallProgress() {
+            const cardScore = (state.masteredCards.size / flashcardData.length) * 25;
+            const matchScore = (state.matchingMatchesFound === 6) ? 25 : (state.matchingMatchesFound / 6) * 25;
+            const sortScore = (state.unsortedItems.length === 0 && (state.sortingEnv.length + state.sortingEthic.length) === sortingData.length) ? 25 : 0;
+            const quizScore = (state.quizIndex >= quizData.length) ? (state.quizScore / quizData.length) * 25 : 0;
+
+            const total = Math.min(100, Math.round(cardScore + matchScore + sortScore + quizScore));
+            document.getElementById('overall-progress-text').innerText = `${total}%`;
+
+            if (total === 100) {
+                triggerConfetti();
+            }
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        /* ================= MODE 1: FLASHCARDS ================= */
+        function initFlashcards() {
+            showCard(state.currentCardIndex);
+        }
+
+        function showCard(index) {
+            state.isCardFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+            
+            const card = flashcardData[index];
+            document.getElementById('card-front-term').innerText = card.term;
+            document.getElementById('card-back-def').innerText = card.def;
+            document.getElementById('flashcard-counter').innerText = `${index + 1} / ${flashcardData.length}`;
+        }
+
+        function flipCard() {
+            state.isCardFlipped = !state.isCardFlipped;
+            const inner = document.getElementById('flashcard-inner');
+            if (state.isCardFlipped) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextCard() {
+            state.currentCardIndex = (state.currentCardIndex + 1) % flashcardData.length;
+            showCard(state.currentCardIndex);
+        }
+
+        function prevCard() {
+            state.currentCardIndex = (state.currentCardIndex - 1 + flashcardData.length) % flashcardData.length;
+            showCard(state.currentCardIndex);
+        }
+
+        function markCard(mastered) {
+            const currentCard = flashcardData[state.currentCardIndex];
+            if (mastered) {
+                state.masteredCards.add(currentCard.id);
+            } else {
+                state.masteredCards.delete(currentCard.id);
+            }
+            document.getElementById('badge-fc').innerText = `Cards: ${state.masteredCards.size}/${flashcardData.length}`;
+            updateOverallProgress();
+            nextCard();
+        }
+
+        /* ================= MODE 2: MATCHING GAME ================= */
+        function initMatchingGame() {
+            clearInterval(state.matchingTimerInterval);
+            state.matchingTimerSeconds = 0;
+            state.matchingMatchesFound = 0;
+            state.matchingSelectedTerm = null;
+            state.matchingSelectedDef = null;
+
+            document.getElementById('matching-timer').innerText = "00:00";
+            state.matchingTimerInterval = setInterval(() => {
+                state.matchingTimerSeconds++;
+                const mins = String(Math.floor(state.matchingTimerSeconds / 60)).padStart(2, '0');
+                const secs = String(state.matchingTimerSeconds % 60).padStart(2, '0');
+                document.getElementById('matching-timer').innerText = `${mins}:${secs}`;
+            }, 1000);
+
+            const subset = [...flashcardData].sort(() => 0.5 - Math.random()).slice(0, 6);
+            const terms = subset.map(item => ({ id: item.id, text: item.term })).sort(() => 0.5 - Math.random());
+            const defs = subset.map(item => ({ id: item.id, text: item.def })).sort(() => 0.5 - Math.random());
+
+            const termsContainer = document.getElementById('matching-terms');
+            const defsContainer = document.getElementById('matching-defs');
+            termsContainer.innerHTML = '';
+            defsContainer.innerHTML = '';
+
+            terms.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = "matching-term-btn w-full p-3 text-left bg-white border border-slate-200 rounded-lg shadow-sm text-sm font-semibold hover:border-brand transition-all flex justify-between items-center";
+                btn.innerHTML = `<span>${t.text}</span><i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => selectMatchingTerm(t.id, btn);
+                btn.dataset.id = t.id;
+                termsContainer.appendChild(btn);
+            });
+
+            defs.forEach(d => {
+                const btn = document.createElement('button');
+                btn.className = "matching-def-btn w-full p-3 text-left bg-white border border-slate-200 rounded-lg shadow-sm text-xs md:text-sm font-medium hover:border-brand transition-all";
+                btn.innerText = d.text;
+                btn.onclick = () => selectMatchingDef(d.id, btn);
+                btn.dataset.id = d.id;
+                defsContainer.appendChild(btn);
+            });
+        }
+
+        function selectMatchingTerm(id, el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('.matching-term-btn').forEach(b => {
+                if (!b.classList.contains('matched')) {
+                    b.classList.remove('border-brand', 'bg-brand-light');
+                }
+            });
+            el.classList.add('border-brand', 'bg-brand-light');
+            state.matchingSelectedTerm = { id, el };
+            checkMatch();
+        }
+
+        function selectMatchingDef(id, el) {
+            if (el.classList.contains('matched')) return;
+            document.querySelectorAll('.matching-def-btn').forEach(b => {
+                if (!b.classList.contains('matched')) {
+                    b.classList.remove('border-brand', 'bg-brand-light');
+                }
+            });
+            el.classList.add('border-brand', 'bg-brand-light');
+            state.matchingSelectedDef = { id, el };
+            checkMatch();
+        }
+
+        function checkMatch() {
+            if (state.matchingSelectedTerm && state.matchingSelectedDef) {
+                if (state.matchingSelectedTerm.id === state.matchingSelectedDef.id) {
+                    // Match Success
+                    const tEl = state.matchingSelectedTerm.el;
+                    const dEl = state.matchingSelectedDef.el;
+
+                    tEl.className = "w-full p-3 text-left bg-emerald-50 border border-emerald-300 rounded-lg text-sm font-semibold text-emerald-800 flex justify-between items-center matched";
+                    tEl.innerHTML = `<span>${tEl.querySelector('span').innerText}</span><i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                    
+                    dEl.className = "w-full p-3 text-left bg-emerald-50 border border-emerald-300 rounded-lg text-xs md:text-sm font-medium text-emerald-800 matched";
+
+                    state.matchingMatchesFound++;
+                    if (state.matchingMatchesFound === 6) {
+                        clearInterval(state.matchingTimerInterval);
+                        document.getElementById('badge-match').innerText = "Match: ✔";
+                        document.getElementById('badge-match').className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold";
+                        updateOverallProgress();
+                    }
+                } else {
+                    // Match Fail - Reset selections
+                    const tEl = state.matchingSelectedTerm.el;
+                    const dEl = state.matchingSelectedDef.el;
+                    tEl.classList.add('border-rose-400', 'bg-rose-50');
+                    dEl.classList.add('border-rose-400', 'bg-rose-50');
+
+                    setTimeout(() => {
+                        tEl.classList.remove('border-rose-400', 'bg-rose-50', 'border-brand', 'bg-brand-light');
+                        dEl.classList.remove('border-rose-400', 'bg-rose-50', 'border-brand', 'bg-brand-light');
+                    }, 600);
+                }
+                state.matchingSelectedTerm = null;
+                state.matchingSelectedDef = null;
+            }
+        }
+
+        /* ================= MODE 3: SORTING TASK ================= */
+        function initSortingGame() {
+            state.unsortedItems = [...sortingData].sort(() => 0.5 - Math.random());
+            state.sortingEnv = [];
+            state.sortingEthic = [];
+            renderSorting();
+        }
+
+        function renderSorting() {
+            const pool = document.getElementById('sorting-pool');
+            const bucketEnv = document.getElementById('bucket-env');
+            const bucketEthic = document.getElementById('bucket-ethic');
+
+            pool.innerHTML = '';
+            bucketEnv.innerHTML = '';
+            bucketEthic.innerHTML = '';
+
+            document.getElementById('unsorted-count').innerText = state.unsortedItems.length;
+
+            state.unsortedItems.forEach(item => {
+                const tag = document.createElement('div');
+                tag.className = "bg-white border border-slate-300 hover:border-brand shadow-sm px-3 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all flex items-center gap-2";
+                tag.innerHTML = `<span>${item.title}</span> <div class="flex gap-1 ml-auto"><button onclick="sortItem('${item.id}', 'env')" title="Assign to Environmental" class="bg-brand-light text-brand px-1.5 py-0.5 rounded hover:bg-brand hover:text-white">Env</button><button onclick="sortItem('${item.id}', 'ethic')" title="Assign to Ethical" class="bg-tealAccent-light text-tealAccent px-1.5 py-0.5 rounded hover:bg-tealAccent hover:text-white">Ethic</button></div>`;
+                pool.appendChild(tag);
+            });
+
+            state.sortingEnv.forEach(item => {
+                const tag = document.createElement('div');
+                const isCorrect = item.category === 'env';
+                tag.className = `p-2 rounded-md text-xs font-medium border flex justify-between items-center ${isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'}`;
+                tag.innerHTML = `<span>${item.title}</span><button onclick="unSortItem('${item.id}', 'env')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
+                bucketEnv.appendChild(tag);
+            });
+
+            state.sortingEthic.forEach(item => {
+                const tag = document.createElement('div');
+                const isCorrect = item.category === 'ethic';
+                tag.className = `p-2 rounded-md text-xs font-medium border flex justify-between items-center ${isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-rose-50 border-rose-300 text-rose-800'}`;
+                tag.innerHTML = `<span>${item.title}</span><button onclick="unSortItem('${item.id}', 'ethic')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>`;
+                bucketEthic.appendChild(tag);
+            });
+
+            document.getElementById('count-bucket-env').innerText = state.sortingEnv.length;
+            document.getElementById('count-bucket-ethic').innerText = state.sortingEthic.length;
+
+            if (state.unsortedItems.length === 0) {
+                const allCorrect = state.sortingEnv.every(i => i.category === 'env') && state.sortingEthic.every(i => i.category === 'ethic');
+                if (allCorrect) {
+                    document.getElementById('badge-sort').innerText = "Sort: ✔";
+                    document.getElementById('badge-sort').className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold";
+                    updateOverallProgress();
+                }
+            }
+        }
+
+        function sortItem(id, targetCategory) {
+            const index = state.unsortedItems.findIndex(i => i.id === id);
+            if (index > -1) {
+                const item = state.unsortedItems.splice(index, 1)[0];
+                if (targetCategory === 'env') state.sortingEnv.push(item);
+                if (targetCategory === 'ethic') state.sortingEthic.push(item);
+                renderSorting();
+            }
+        }
+
+        function unSortItem(id, sourceCategory) {
+            let list = sourceCategory === 'env' ? state.sortingEnv : state.sortingEthic;
+            const index = list.findIndex(i => i.id === id);
+            if (index > -1) {
+                const item = list.splice(index, 1)[0];
+                state.unsortedItems.push(item);
+                renderSorting();
+            }
+        }
+
+        /* ================= MODE 4: FILL-IN-THE-BLANKS ================= */
+        function initClozeGame() {
+            const wordbank = document.getElementById('cloze-wordbank');
+            const questions = document.getElementById('cloze-questions');
+            wordbank.innerHTML = '';
+            questions.innerHTML = '';
+
+            const allAnswers = clozeData.map(c => c.answer).sort(() => 0.5 - Math.random());
+            allAnswers.forEach(word => {
+                const badge = document.createElement('span');
+                badge.className = "bg-white border border-brand/40 text-brand px-3 py-1 rounded-lg text-xs font-bold shadow-sm";
+                badge.innerText = word;
+                wordbank.appendChild(badge);
+            });
+
+            clozeData.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl border border-slate-200 space-y-3";
+
+                const parts = item.sentence.split('________');
+                card.innerHTML = `
+                    <div class="text-sm font-medium text-slate-700 leading-relaxed">
+                        ${idx + 1}. ${parts[0]} 
+                        <select id="cloze-select-${idx}" class="inline-block mx-1 p-1 bg-slate-50 border border-slate-300 rounded text-sm font-bold text-brand focus:ring-2 focus:ring-brand">
+                            <option value="">-- select --</option>
+                            ${item.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select> 
+                        ${parts[1]}
+                    </div>
+                    <div id="cloze-feedback-${idx}" class="hidden text-xs font-semibold p-2 rounded-lg"></div>
+                `;
+                questions.appendChild(card);
+            });
+        }
+
+        function checkClozeAnswers() {
+            clozeData.forEach((item, idx) => {
+                const select = document.getElementById(`cloze-select-${idx}`);
+                const feedback = document.getElementById(`cloze-feedback-${idx}`);
+                feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+
+                if (select.value === item.answer) {
+                    feedback.classList.add('bg-emerald-50', 'text-emerald-800');
+                    feedback.innerText = "Correct answer!";
+                } else {
+                    feedback.classList.add('bg-rose-50', 'text-rose-800');
+                    feedback.innerText = `Incorrect. Correct answer: ${item.answer}`;
+                }
+            });
+        }
+
+        /* ================= MODE 5: PRACTICE QUIZ ================= */
+        function initQuiz() {
+            state.quizIndex = 0;
+            state.quizScore = 0;
+            showQuizQuestion(0);
+        }
+
+        function showQuizQuestion(index) {
+            state.quizAnswered = false;
+            document.getElementById('quiz-question-number').innerText = `Question ${index + 1} of ${quizData.length}`;
+            document.getElementById('quiz-score-badge').innerText = `Score: ${state.quizScore}`;
+            
+            const q = quizData[index];
+            document.getElementById('quiz-question-text').innerText = q.question;
+
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+            document.getElementById('quiz-explanation').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+
+            q.options.forEach((opt, oIdx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3.5 text-left bg-slate-50 border border-slate-200 hover:border-brand hover:bg-brand-light/30 rounded-xl text-sm font-medium text-slate-700 transition-all flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-300"></i>`;
+                btn.onclick = () => answerQuiz(oIdx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function answerQuiz(optionIndex, btnEl) {
+            if (state.quizAnswered) return;
+            state.quizAnswered = true;
+
+            const q = quizData[state.quizIndex];
+            const container = document.getElementById('quiz-options-container');
+            const buttons = container.querySelectorAll('button');
+
+            buttons.forEach((b, idx) => {
+                b.disabled = true;
+                if (idx === q.correct) {
+                    b.className = "w-full p-3.5 text-left bg-emerald-50 border-2 border-emerald-400 rounded-xl text-sm font-bold text-emerald-800 flex items-center justify-between";
+                    b.innerHTML = `<span>${b.querySelector('span').innerText}</span> <i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                } else if (idx === optionIndex) {
+                    b.className = "w-full p-3.5 text-left bg-rose-50 border-2 border-rose-400 rounded-xl text-sm font-bold text-rose-800 flex items-center justify-between";
+                    b.innerHTML = `<span>${b.querySelector('span').innerText}</span> <i class="fa-solid fa-circle-xmark text-rose-600"></i>`;
+                }
+            });
+
+            if (optionIndex === q.correct) {
+                state.quizScore++;
+                document.getElementById('quiz-score-badge').innerText = `Score: ${state.quizScore}`;
+            }
+
+            const exp = document.getElementById('quiz-explanation');
+            exp.classList.remove('hidden');
+            document.getElementById('quiz-explanation-title').innerText = optionIndex === q.correct ? "Correct!" : "Incorrect";
+            document.getElementById('quiz-explanation-title').className = `font-bold mb-1 ${optionIndex === q.correct ? 'text-emerald-700' : 'text-rose-700'}`;
+            document.getElementById('quiz-explanation-body').innerText = q.explanation;
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            state.quizIndex++;
+            if (state.quizIndex < quizData.length) {
+                showQuizQuestion(state.quizIndex);
+            } else {
+                // Quiz finished
+                const pct = Math.round((state.quizScore / quizData.length) * 100);
+                document.getElementById('badge-quiz').innerText = `Quiz: ${pct}%`;
+                document.getElementById('badge-quiz').className = "px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold";
+                
+                const container = document.getElementById('quiz-options-container');
+                container.innerHTML = `
+                    <div class="text-center py-6 space-y-3">
+                        <div class="text-4xl text-yellow-400"><i class="fa-solid fa-award"></i></div>
+                        <h4 class="text-xl font-bold text-slate-800">Quiz Completed!</h4>
+                        <p class="text-sm text-slate-600">You scored <strong>${state.quizScore} out of ${quizData.length}</strong> (${pct}%).</p>
+                        <button onclick="initQuiz()" class="px-4 py-2 bg-brand text-white font-semibold rounded-lg text-sm mt-2"><i class="fa-solid fa-rotate-right mr-1"></i> Retake Quiz</button>
+                    </div>
+                `;
+                document.getElementById('quiz-question-text').innerText = "Summary";
+                document.getElementById('quiz-explanation').classList.add('hidden');
+                document.getElementById('quiz-next-btn').classList.add('hidden');
+
+                updateOverallProgress();
+            }
+        }
+    </script>
+</body>
+</html>
